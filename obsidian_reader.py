@@ -425,10 +425,10 @@ def display_welcome_banner(reader_type=None):
 def main():
     """主函数"""
     parser = argparse.ArgumentParser(description='Obsidian文件阅读器')
-    parser.add_argument('--file', help='指定Obsidian文件路径')
+    parser.add_argument('-f', '--file', help='指定Obsidian文件路径')
     parser.add_argument('-r', '--random', action='store_true', help='显示一个随机条目并退出')
     parser.add_argument('-l', '--list', action='store_true', help='列出所有条目并退出')
-    parser.add_argument('--type', choices=['t', 'r', 'q'], help='指定读取器类型，可以是t (todo), r (read), q (ques)')
+    parser.add_argument('-t', '--type', choices=['t', 'r', 'q'], help='指定读取器类型，可以是t (todo), r (read), q (ques)')
     
     args = parser.parse_args()
     
