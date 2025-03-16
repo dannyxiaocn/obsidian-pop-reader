@@ -12,10 +12,24 @@ import argparse
 import webbrowser
 import platform
 import datetime
+import termios
+import tty
 from colorama import init, Fore, Style, Back
 
 # 初始化colorama
 init()
+
+# 定义getch函数，用于获取单个按键输入而不需要按回车
+def getch():
+    """获取单个按键输入而不需要按回车"""
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(fd)
+        ch = sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return ch
 
 class ObsidianReader:
     """Obsidian文件阅读器类"""
@@ -271,7 +285,9 @@ class ObsidianReader:
                 print(f"  {Fore.GREEN}l{Style.RESET_ALL} - 列出所有条目")
                 print(f"  {Fore.GREEN}q{Style.RESET_ALL} - 退出")
                 
-                choice = input(f"\n{Fore.GREEN}请输入命令: {Style.RESET_ALL}").strip().lower()
+                print(f"\n{Fore.GREEN}请按键执行命令: {Style.RESET_ALL}", end="", flush=True)
+                choice = getch().lower()
+                print(choice)  # 显示用户输入的字符
                 
                 if choice == 'n':
                     parent_and_subs = self.get_random_item()
@@ -287,23 +303,27 @@ class ObsidianReader:
                         continue
                 elif choice == 'o' and parent_url:
                     self.open_url(parent_url)
-                elif choice.startswith('o') and len(choice) > 1:
+                elif choice == 'o' and sub_urls:
+                    # 如果按下o且有子条目链接，提示用户输入子条目索引
+                    print(f"\n{Fore.GREEN}请输入子条目索引 (1-{len(sub_urls)}): {Style.RESET_ALL}", end="", flush=True)
+                    sub_choice = input().strip()
                     try:
-                        # 尝试提取子条目索引
-                        sub_index = int(choice[1:]) - 1
+                        sub_index = int(sub_choice) - 1
                         if 0 <= sub_index < len(sub_urls):
                             self.open_url(sub_urls[sub_index], sub_index + 1)
                         else:
-                            print(f"{Fore.RED}无效的子条目索引{Style.RESET_ALL}")
+                            print(f"\n{Fore.RED}无效的子条目索引{Style.RESET_ALL}")
                     except ValueError:
-                        print(f"{Fore.RED}无效的命令格式{Style.RESET_ALL}")
+                        print(f"\n{Fore.RED}无效的索引格式{Style.RESET_ALL}")
                 elif choice == 'l':
                     # 清屏并显示欢迎界面
                     self.clear_screen()
                     display_welcome_banner(self.reader_type)
                     
                     self.list_all_items()
-                    input(f"\n{Fore.GREEN}按Enter键返回...{Style.RESET_ALL}")
+                    print(f"\n{Fore.GREEN}按任意键返回...{Style.RESET_ALL}", end="", flush=True)
+                    getch()
+                    print()  # 换行
                     self.display_item(parent_item, sub_items)
                 elif choice == 'q':
                     print(f"\n{Fore.YELLOW}感谢使用，再见！{Style.RESET_ALL}")
