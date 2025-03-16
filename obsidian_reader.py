@@ -385,6 +385,8 @@ def display_welcome_banner(reader_type=None):
         f"| Obsidian {type_full.capitalize()} v1.0.0",
         f"| 日期: {current_date}",
         f"| 作者: bocheng & windsurf",
+        f"| ",
+        f"| 仓库: https://github.com/dannyxiaocn/obsidian-pop-reader",
     ]
     
     # 计算最长的行长度
